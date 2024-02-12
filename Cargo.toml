@@ -1,0 +1,8 @@
+[package]
+name = "zirconium_mc_lib"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+flate2 = "1.0.28"
+regex = "1.10.2"
