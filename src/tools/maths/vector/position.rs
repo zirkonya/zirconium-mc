@@ -1,6 +1,6 @@
 use crate::tools::utils::bin::Binary;
 
-#[derive(PartialEq, Eq, Debug, Clone, Copy)]
+#[derive(PartialEq, Eq, Debug, Clone, Copy, Hash)]
 pub struct Position {
     x: i32,
     z: i32,

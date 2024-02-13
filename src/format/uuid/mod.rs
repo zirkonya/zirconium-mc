@@ -28,7 +28,7 @@ pub fn random<T>(seed: T, salt: T) -> T
     value
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct Uuid {
     data: u128
 }
