@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{format::uuid::Uuid, minecraft::{blocks::Block, entity::Entity}, tools::{logic::{physic::Physic, generator::Generator}, maths::vector::position::Position}};
+use crate::{format::uuid::Uuid, minecraft::{blocks::Block, entity::Entity}, tools::{logic::{physics::Physics, generator::Generator}, maths::vector::position::Position}};
 
 pub struct Chunk {
     x: i32,
@@ -64,14 +64,17 @@ impl Chunk {
         self.entities.get_mut(uuid)
     }
 
-    pub fn update_blocks<P: Physic>(&mut self, physic: &P) {
-        physic.apply_physic(&mut self.blocks);
+    pub fn update_blocks<P: Physics>(&mut self, physics: &P) {
+        physics.apply_physics(&mut self.blocks);
+    }
+
+    pub fn save(&self) {
+        todo!()
     }
 }
 
 impl Drop for Chunk {
     fn drop(&mut self) {
-        // TODO : Save content on disk
-        todo!()
+        self.save();
     }
 }

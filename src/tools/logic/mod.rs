@@ -1,2 +1,2 @@
 pub mod generator;
-pub mod physic;
+pub mod physics;

@@ -1,10 +1,10 @@
 use std::str::FromStr;
 use crate::{format::text::identifier::Identifier, gen_bin, gen_struct, tools::{maths::{varint::varint::VarInt, vector::{vector2::Vector2f, vector3::{Location, Vector3f}}}, utils::bin::binarray::Array}};
 
-const NODE_TYPE: u8 = 0x03;
-const IS_EXECUTABLE: u8 = 0x04;
-const HAS_REDIRECT: u8 = 0x08;
-const HAS_SUGGESTION_TYPE: u8 = 0x10;
+// const NODE_TYPE: u8 = 0x03;
+// const IS_EXECUTABLE: u8 = 0x04;
+// const HAS_REDIRECT: u8 = 0x08;
+// const HAS_SUGGESTION_TYPE: u8 = 0x10;
 
 gen_bin!(Node {
     flags: u8,
