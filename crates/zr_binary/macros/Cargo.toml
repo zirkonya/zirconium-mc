@@ -1,0 +1,15 @@
+[package]
+name = "zr_binary_macros"
+version = "0.1.0"
+edition = "2021"
+authors = ["zirkonya"]
+license = "GPL-3.0-only" 
+repository = "https://github.com/zirkonya/zirconium-mc"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1.0.84"
+syn = "2.0.66"
+quote = "1.0.36"
