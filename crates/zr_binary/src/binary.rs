@@ -1,7 +1,4 @@
-use varint::VarInt;
-
-use crate::error::{BinaryError, Result};
-pub mod varint;
+use crate::{error::{BinaryError, Result}, varint::VarInt};
 
 pub trait Binary {
     fn binary_len(&self) -> usize;

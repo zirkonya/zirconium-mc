@@ -7,8 +7,4 @@ license = "GPL-3.0-only"
 repository = "https://github.com/zirkonya/zirconium-mc"
 
 [dependencies]
-zr_binary_macros = { path = "./macros", version = "0.1.0", optional = true }
-
-[features]
-default = []
-zr_binary_macros = ["dep:zr_binary_macros"]
+serde = "1.0.203"
