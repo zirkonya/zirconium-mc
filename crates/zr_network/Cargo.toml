@@ -1,0 +1,16 @@
+[package]
+name = "zr_network"
+version = "0.1.0"
+edition = "2021"
+authors = ["zirkonya"]
+license = "GPL-3.0-only" 
+repository = "https://github.com/zirkonya/zirconium-mc"
+
+[dependencies]
+aes = "0.8.4"
+flate2 = "1.0.30"
+rand = "0.8.5"
+rsa = "0.9.6"
+tokio = { version = "1.38.0", features = ["full"] }
+zr_binary = { version = "0.1.0", path = "../zr_binary" }
+zr_network_macros = { version = "0.1.0", path = "./macros", optional = true }
