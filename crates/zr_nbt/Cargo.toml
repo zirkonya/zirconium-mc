@@ -1,0 +1,9 @@
+[package]
+name = "zr_nbt"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+fastnbt = "2.5.0"
+serde = "1.0.203"
+zr_binary = { version = "0.1.0", path = "../zr_binary" }
