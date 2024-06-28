@@ -23,11 +23,11 @@ pub struct ClientNetworkHandler<S: Sender<TcpStream>, R: Receiver<TcpStream>>
 }
 
 impl ClientNetworkHandler<ClientSenderThread, ClientReveiverThread> {
-    pub async fn new(tcp_stream: TcpStream) -> Self {
-        Self::with_options(tcp_stream, HandlerOptions::default()).await
+    pub fn new(tcp_stream: TcpStream) -> Self {
+        Self::with_options(tcp_stream, HandlerOptions::default())
     }
 
-    pub async fn with_options(tcp_stream: TcpStream, options: HandlerOptions) -> Self {
+    pub fn with_options(tcp_stream: TcpStream, options: HandlerOptions) -> Self {
         let stream = Arc::new(Mutex::new(tcp_stream));
         let alive = Arc::new(Mutex::new(true));
 
