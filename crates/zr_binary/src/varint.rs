@@ -1,19 +1,51 @@
-use std::{fmt::Debug, ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign}};
+use std::{
+    fmt::Debug,
+    io::Read,
+    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
+};
 
 use crate::{binary::Binary, error::BinaryError};
 
 const SEGMENT_BITS: u8 = 0x7F;
 const CONTINUE_BIT: u8 = 0x80;
 
+macro_rules! read_byte {
+    ($reader: expr) => {{
+        let mut byte: u8 = 0;
+        match $reader.read_exact(std::slice::from_mut(&mut byte)) {
+            Ok(_) => Ok(byte),
+            Err(e) => Err(e),
+        }
+    }};
+}
+
+pub fn from_reader<R: Read>(reader: &mut R) -> std::io::Result<Result<VarInt<i32>, BinaryError>> {
+    let segment_bits = SEGMENT_BITS;
+    let continue_bit = CONTINUE_BIT;
+    let mut value: u32 = 0;
+    let mut position: usize = 0;
+    loop {
+        if position >= u32::BITS as usize {
+            break Ok(Err(BinaryError::FormatError));
+        }
+        let current_byte: u8 = read_byte!(reader)?;
+        value |= ((current_byte & segment_bits) as u32) << position;
+        if current_byte & continue_bit == 0 {
+            break Ok(Ok(VarInt::<i32>::new(value as i32)));
+        }
+        position += 7;
+    }
+}
+
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct VarInt<T: Default>(pub T);
 
-impl <T: Default> VarInt<T> {
+impl<T: Default> VarInt<T> {
     pub fn new(i: T) -> Self {
         Self(i)
     }
 }
-impl <T: Default + Add<Output = T>> Add for VarInt<T> {
+impl<T: Default + Add<Output = T>> Add for VarInt<T> {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
@@ -21,13 +53,13 @@ impl <T: Default + Add<Output = T>> Add for VarInt<T> {
     }
 }
 
-impl <T: Default + AddAssign> AddAssign for VarInt<T> {
+impl<T: Default + AddAssign> AddAssign for VarInt<T> {
     fn add_assign(&mut self, rhs: Self) {
         self.0 += rhs.0
     }
 }
 
-impl <T: Default + Sub<Output = T>> Sub for VarInt<T> {
+impl<T: Default + Sub<Output = T>> Sub for VarInt<T> {
     type Output = Self;
 
     fn sub(self, rhs: Self) -> Self::Output {
@@ -35,35 +67,35 @@ impl <T: Default + Sub<Output = T>> Sub for VarInt<T> {
     }
 }
 
-impl <T: Default + SubAssign> SubAssign for VarInt<T> {
+impl<T: Default + SubAssign> SubAssign for VarInt<T> {
     fn sub_assign(&mut self, rhs: Self) {
         self.0 -= rhs.0
     }
 }
 
-impl <T: Default + Div<Output = T>> Div for VarInt<T> {
+impl<T: Default + Div<Output = T>> Div for VarInt<T> {
     type Output = Self;
-    
+
     fn div(self, rhs: Self) -> Self::Output {
         Self(self.0 / rhs.0)
     }
 }
 
-impl <T: Default + DivAssign> DivAssign for VarInt<T> {
+impl<T: Default + DivAssign> DivAssign for VarInt<T> {
     fn div_assign(&mut self, rhs: Self) {
         self.0 /= rhs.0
     }
 }
 
-impl <T: Default + Mul<Output = T>> Mul for VarInt<T> {
+impl<T: Default + Mul<Output = T>> Mul for VarInt<T> {
     type Output = Self;
 
     fn mul(self, rhs: Self) -> Self::Output {
-        Self(self.0 * rhs.0) 
+        Self(self.0 * rhs.0)
     }
 }
 
-impl <T: Default + MulAssign> MulAssign for VarInt<T> {
+impl<T: Default + MulAssign> MulAssign for VarInt<T> {
     fn mul_assign(&mut self, rhs: Self) {
         self.0 *= rhs.0
     }
@@ -101,7 +133,10 @@ impl Binary for VarInt<i32> {
         vec
     }
 
-    fn from_binary(bin: Vec<u8>) -> crate::error::Result<Self> where Self: Sized {
+    fn from_binary(bin: Vec<u8>) -> crate::error::Result<Self>
+    where
+        Self: Sized,
+    {
         let segment_bits = SEGMENT_BITS;
         let continue_bit = CONTINUE_BIT;
         let mut value: u32 = 0;
@@ -163,7 +198,10 @@ impl Binary for VarInt<i64> {
         vec
     }
 
-    fn from_binary(bin: Vec<u8>) -> crate::error::Result<Self> where Self: Sized {
+    fn from_binary(bin: Vec<u8>) -> crate::error::Result<Self>
+    where
+        Self: Sized,
+    {
         let segment_bits = SEGMENT_BITS;
         let continue_bit = CONTINUE_BIT;
         let mut value: u64 = 0;
@@ -189,12 +227,6 @@ macro_rules! convert {
         impl From<$from> for VarInt<$to> {
             fn from(value: $from) -> Self {
                 Self(value as $to)
-            }
-        }
-
-        impl Into<$from> for VarInt<$to> {
-            fn into(self) -> $from {
-                self.0 as $from
             }
         }
     };
@@ -227,3 +259,4 @@ convert!(i32   => i64);
 convert!(i64   => i64);
 convert!(i128  => i64);
 convert!(isize => i64);
+
