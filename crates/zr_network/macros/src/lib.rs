@@ -41,7 +41,6 @@ fn parse_on(input: ImplItemFn) -> (TokenStream, Block) {
     for attr in attrs {
         if let Meta::List(MetaList { path, tokens, .. }) = attr.meta {
             if path.is_ident("on") {
-                println!("{}", tokens);
                 event = Some(tokens.into());
                 break;
             }
@@ -77,7 +76,6 @@ fn parse_match(mut blocks: Vec<(proc_macro2::TokenStream, Block)>) -> proc_macro
             #current
         }
     });
-    println!("{event_blocks:?}");
     quote! {
         match event {
             #(#event_blocks)*
@@ -86,6 +84,7 @@ fn parse_match(mut blocks: Vec<(proc_macro2::TokenStream, Block)>) -> proc_macro
     }
 }
 
+// TODO : Add priority tag
 #[proc_macro_attribute]
 pub fn listener(_: TokenStream, input: TokenStream) -> TokenStream {
     let ItemImpl {
@@ -101,7 +100,6 @@ pub fn listener(_: TokenStream, input: TokenStream) -> TokenStream {
             blocks.push((event.into(), block));
         }
     }
-    println!("{}", blocks.len());
     let match_pattern = parse_match(blocks);
     let parsed = quote! {
         impl #generics Listener for #self_ty {
@@ -112,6 +110,5 @@ pub fn listener(_: TokenStream, input: TokenStream) -> TokenStream {
         }
     }
     .into();
-    println!("{parsed}");
     parsed
 }
