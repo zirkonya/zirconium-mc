@@ -1,12 +1,12 @@
 use std::{error::Error, fmt::Display};
 
-use super::{handler::HandlerError, packet::PacketError};
+use super::{packet::PacketError, worker::WorkerError};
 
 #[derive(Debug)]
 pub enum NetworkError {
     ProtocolError,
     TimedOut,
-    ThreadError(HandlerError),
+    ThreadError(WorkerError),
     PacketError(PacketError),
     IOError(std::io::Error),
     Other(Box<dyn Error>),
