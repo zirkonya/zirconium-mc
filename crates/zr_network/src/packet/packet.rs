@@ -1,11 +1,8 @@
-use std::io;
-
-use flate2::Compression;
-use zr_binary::{binary::Binary, varint::VarInt};
-
-use crate::error::packet::PacketError;
-
 use super::{compressed::CompressedPacket, PacketData};
+use crate::error::packet::PacketError;
+use flate2::Compression;
+use std::io;
+use zr_binary::{binary::Binary, varint::VarInt};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Packet {
