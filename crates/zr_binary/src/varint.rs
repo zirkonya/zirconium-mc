@@ -6,9 +6,10 @@ use std::{
 
 use crate::{binary::Binary, error::BinaryError};
 
-const SEGMENT_BITS: u8 = 0x7F;
-const CONTINUE_BIT: u8 = 0x80;
+pub const SEGMENT_BITS: u8 = 0x7F;
+pub const CONTINUE_BIT: u8 = 0x80;
 
+#[macro_export]
 macro_rules! read_byte {
     ($reader: expr) => {{
         let mut byte: u8 = 0;
@@ -259,4 +260,3 @@ convert!(i32   => i64);
 convert!(i64   => i64);
 convert!(i128  => i64);
 convert!(isize => i64);
-
