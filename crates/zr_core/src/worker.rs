@@ -4,44 +4,44 @@ use std::{
     thread::JoinHandle,
 };
 
-macro_rules! try_work {
-    (init $worker: expr) => {
-        match $worker.try_lock() {
-            Ok(mut worker) => worker.init(),
-            Err(err) if err == Err(err) => {
-                eprintln!("{err:?}");
-                panic!("worker crash during init, follow error above")
-            }
-        }
-    };
-    (handle $worker: expr) => {
-        match $worker.lock() {
-            Ok(mut worker) => worker.handle(),
-            Err(err) => {
-                eprintln!("{err:?}");
-                panic!("worker crash during handle, follow error above")
-            }
-        }
-    };
-    (end $worker: expr) => {
-        match $worker.lock() {
-            Ok(mut worker) => worker.end(),
-            Err(err) => {
-                eprintln!("{err:?}");
-                panic!("worker crash during end, follow error above")
-            }
-        }
-    };
-    (is_alive $worker: expr) => {
-        match $worker.lock() {
-            Ok(worker) => worker.is_alive(),
-            Err(err) => {
-                eprintln!("{err:?}");
-                false
-            }
-        }
-    };
-}
+// macro_rules! try_work {
+//     (init $worker: expr) => {
+//         match $worker.try_lock() {
+//             Ok(mut worker) => worker.init(),
+//             Err(err) if err == Err(err) => {
+//                 eprintln!("{err:?}");
+//                 panic!("worker crash during init, follow error above")
+//             }
+//         }
+//     };
+//     (handle $worker: expr) => {
+//         match $worker.lock() {
+//             Ok(mut worker) => worker.handle(),
+//             Err(err) => {
+//                 eprintln!("{err:?}");
+//                 panic!("worker crash during handle, follow error above")
+//             }
+//         }
+//     };
+//     (end $worker: expr) => {
+//         match $worker.lock() {
+//             Ok(mut worker) => worker.end(),
+//             Err(err) => {
+//                 eprintln!("{err:?}");
+//                 panic!("worker crash during end, follow error above")
+//             }
+//         }
+//     };
+//     (is_alive $worker: expr) => {
+//         match $worker.lock() {
+//             Ok(worker) => worker.is_alive(),
+//             Err(err) => {
+//                 eprintln!("{err:?}");
+//                 false
+//             }
+//         }
+//     };
+// }
 
 macro_rules! work {
     (init $worker: expr) => {
