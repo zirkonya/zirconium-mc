@@ -58,10 +58,16 @@ impl EventManager {
 
     fn call(&mut self, event: &Event) {
         for listener in &mut self.listeners {
-            if let Err(err) = listener.as_mut().handle_event(&event) {
+            if let Err(err) = listener.as_mut().handle_event(event) {
                 eprintln!("Error while listening : {event:?} {err:?}");
             }
         }
+    }
+}
+
+impl Default for EventManager {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

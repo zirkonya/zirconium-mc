@@ -32,8 +32,8 @@ impl ClientManager {
     }
 
     fn next_id(&self) -> Option<(u16, u16)> {
-        for cid in 0..self.max_cid as u16 {
-            for pid in 0..self.max_pid as u16 {
+        for cid in 0..self.max_cid {
+            for pid in 0..self.max_pid {
                 if !self.clients_partition.contains_key(&pid)
                     || !self.clients_partition[&pid]
                         .lock()

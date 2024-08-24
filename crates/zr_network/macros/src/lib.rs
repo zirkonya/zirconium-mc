@@ -25,12 +25,12 @@ pub fn packet_derive(input: TokenStream) -> TokenStream {
         panic!("The `id` attribute is required");
     };
 
-    let gen = quote! {
+    quote! {
         impl #generic_impl #generic_ty zr_network::packet::PacketData for #ident #where_clause {
             const ID: i32 = #id;
         }
-    };
-    gen.into()
+    }
+    .into()
 }
 
 // return (Event is call, the block to call when event is reach)
@@ -101,7 +101,7 @@ pub fn listener(_: TokenStream, input: TokenStream) -> TokenStream {
         }
     }
     let match_pattern = parse_match(blocks);
-    let parsed = quote! {
+    quote! {
         impl #generics Listener for #self_ty {
             fn handle_event(&mut self, event: &Event) -> Result<(), Box<dyn Error>> {
                 #match_pattern
@@ -109,6 +109,5 @@ pub fn listener(_: TokenStream, input: TokenStream) -> TokenStream {
             }
         }
     }
-    .into();
-    parsed
+    .into()
 }

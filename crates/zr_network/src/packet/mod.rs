@@ -21,6 +21,7 @@ pub trait PacketData {
             data: self.to_binary(),
         }
     }
+
     fn from_packet(packet: Packet) -> Result<Self, PacketError>
     where
         Self: Sized + Binary,
@@ -32,6 +33,6 @@ pub trait PacketData {
                 found: id,
             });
         }
-        Self::from_binary(packet.data).map_err(|err| PacketError::DataError(err))
+        Self::from_binary(packet.data).map_err(PacketError::DataError)
     }
 }

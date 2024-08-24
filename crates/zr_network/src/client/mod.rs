@@ -12,6 +12,8 @@ use zr_binary::{
     varint::{self, VarInt},
 };
 
+pub mod manager;
+
 const MAX_SIZE: usize = 2_097_149;
 
 pub struct Client {
@@ -35,7 +37,7 @@ impl Client {
 
     pub fn read_packet(&mut self) -> Result<Packet, NetworkError> {
         let len = varint::from_reader(&mut self.stream)
-            .map_err(|err| NetworkError::IOError(err))?
+            .map_err(NetworkError::IOError)?
             .map_err(|err| NetworkError::PacketError(PacketError::DataError(err)))?;
         if (len.0 as usize) < MAX_SIZE {
             return Err(NetworkError::PacketError(PacketError::DataError(
@@ -45,7 +47,7 @@ impl Client {
         let mut buf = vec![0_u8; len.0 as usize];
         self.stream
             .read(&mut buf)
-            .map_err(|err| NetworkError::IOError(err))?;
+            .map_err(NetworkError::IOError)?;
         Packet::from_binary(buf)
             .map_err(|err| NetworkError::PacketError(PacketError::DataError(err)))
     }
@@ -56,7 +58,7 @@ impl Client {
         vec.extend(packet.to_binary());
         self.stream
             .write(&vec)
-            .map_err(|err| NetworkError::IOError(err))?;
+            .map_err(NetworkError::IOError)?;
         Ok(())
     }
 }
