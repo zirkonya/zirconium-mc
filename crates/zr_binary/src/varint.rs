@@ -230,6 +230,12 @@ macro_rules! convert {
                 Self(value as $to)
             }
         }
+
+        impl Into<$from> for VarInt<$to> {
+            fn into(self) -> $from {
+                self.0 as $from
+            }
+        }
     };
 }
 

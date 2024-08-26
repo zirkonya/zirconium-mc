@@ -20,7 +20,6 @@ pub struct EncryptionResponse {
     pub(crate) verify_token: Vec<u8>,
 }
 
-
 #[derive(Binary, Packet)]
 #[id = 0x02]
 pub struct LoginPluginResponse {
@@ -33,3 +32,4 @@ pub struct LoginPluginResponse {
 #[derive(Binary, Packet)]
 #[id = 0x03]
 pub struct LoginAcknowledge;
+

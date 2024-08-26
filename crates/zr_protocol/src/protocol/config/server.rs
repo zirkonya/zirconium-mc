@@ -84,3 +84,4 @@ pub struct UpdateTags {
     #[prefixed_length = "VarInt<i32>"]
     pub(crate) tags: Vec<Tag>,
 }
+

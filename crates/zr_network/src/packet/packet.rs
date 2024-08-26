@@ -51,7 +51,7 @@ impl Binary for Packet {
     where
         Self: Sized,
     {
-        let id = VarInt::<i32>::from_binary(bin[0..5].to_vec())?;
+        let id = VarInt::<i32>::from_binary(bin[0..].to_vec())?;
         let cursor = id.binary_len();
         let data = bin[cursor..].to_vec();
         Ok(Self { id, data })

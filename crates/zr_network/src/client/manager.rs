@@ -1,4 +1,4 @@
-use crate::{client::Client, packet::packet::Packet};
+use crate::{client::Client, error::network::NetworkError, packet::packet::Packet};
 use std::{
     collections::{HashMap, HashSet},
     sync::{
@@ -76,7 +76,14 @@ impl ClientManager {
                                 .send((Self::merge_id(pid, cid), packet))
                                 .expect("Error while sending event");
                         }
-                        Err(err) => eprintln!("[{pid:04x}_{cid:04x}] {err:?}"),
+                        Err(err) => {
+                            if let NetworkError::IOError(err) = &err {
+                                if let std::io::ErrorKind::WouldBlock = err.kind() {
+                                    continue;
+                                }
+                            }
+                            eprintln!("[{pid:04x}_{cid:04x}] {err:?}")
+                        }
                     }
                 }
             } else {

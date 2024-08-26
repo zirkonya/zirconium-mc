@@ -35,7 +35,8 @@ impl Client {
         let len = varint::from_reader(&mut self.stream)
             .map_err(NetworkError::IOError)?
             .map_err(|err| NetworkError::PacketError(PacketError::DataError(err)))?;
-        if (len.0 as usize) < MAX_SIZE {
+        println!("[DEBUG] {len:?}");
+        if (len.0 as usize) >= MAX_SIZE || len.0 < 0 {
             return Err(NetworkError::PacketError(PacketError::DataError(
                 BinaryError::LengthError,
             )));
