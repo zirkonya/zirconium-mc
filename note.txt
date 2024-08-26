@@ -1,3 +1,0 @@
-on change les événements pour des paquets
-
-les événements est une abstraction des paquets reçus ! 
