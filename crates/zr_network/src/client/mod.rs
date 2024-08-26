@@ -16,23 +16,19 @@ pub mod manager;
 
 const MAX_SIZE: usize = 2_097_149;
 
+#[derive(Debug)]
 pub struct Client {
-    id: u32,
     stream: TcpStream,
 }
 
 impl Client {
-    pub fn new(id: u32, stream: TcpStream) -> Result<Self, Error> {
+    pub fn new(stream: TcpStream) -> Result<Self, Error> {
         stream.set_nonblocking(true)?;
-        Ok(Self { id, stream })
+        Ok(Self { stream })
     }
 
     pub fn shutdown(&mut self) -> Result<(), std::io::Error> {
         self.stream.shutdown(std::net::Shutdown::Both)
-    }
-
-    pub fn id(&self) -> u32 {
-        self.id
     }
 
     pub fn read_packet(&mut self) -> Result<Packet, NetworkError> {
@@ -45,9 +41,7 @@ impl Client {
             )));
         }
         let mut buf = vec![0_u8; len.0 as usize];
-        self.stream
-            .read(&mut buf)
-            .map_err(NetworkError::IOError)?;
+        self.stream.read(&mut buf).map_err(NetworkError::IOError)?;
         Packet::from_binary(buf)
             .map_err(|err| NetworkError::PacketError(PacketError::DataError(err)))
     }
@@ -56,9 +50,13 @@ impl Client {
         let len: VarInt<i32> = packet.binary_len().into();
         let mut vec = len.to_binary();
         vec.extend(packet.to_binary());
-        self.stream
-            .write(&vec)
-            .map_err(NetworkError::IOError)?;
+        self.stream.write(&vec).map_err(NetworkError::IOError)?;
         Ok(())
+    }
+
+    pub fn try_clone(&self) -> Self {
+        Self {
+            stream: self.stream.try_clone().expect("Cannot clone stream"), // TODO : handle error
+        }
     }
 }

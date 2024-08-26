@@ -3,14 +3,11 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-use crate::packet::packet::Packet;
+use crate::{client::Client, packet::packet::Packet};
 
-// TODO : Handler (who)
-//      : When
-//      : Cancel?
 #[derive(Debug)]
 pub enum Event {
-    ClientJoin { client_id: u32 },
+    ClientJoin { client_id: u32, client: Client },
     ClientQuit { client_id: u32, reason: String },
     ClientSendPacket { client_id: u32, packet: Packet },
 }

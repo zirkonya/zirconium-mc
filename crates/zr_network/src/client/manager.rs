@@ -1,7 +1,6 @@
-use crate::{client::Client, event::event::Event};
+use crate::{client::Client, packet::packet::Packet};
 use std::{
     collections::{HashMap, HashSet},
-    net::TcpStream,
     sync::{
         mpsc::{self, Receiver, Sender},
         Arc, Mutex,
@@ -13,21 +12,24 @@ pub struct ClientManager {
     max_cid: u16,
     clients_partition: HashMap<u16, Arc<Mutex<HashMap<u16, Client>>>>,
     free_id: HashSet<(u16, u16)>,
-    event_sender: Sender<Event>,
+    packet_sender: Sender<(u32, Packet)>,
 }
 
 impl ClientManager {
-    pub fn new(max_client_per_partition: u16, max_partition: u16) -> (Self, Receiver<Event>) {
-        let (event_sender, event_receiver) = mpsc::channel();
+    pub fn new(
+        max_client_per_partition: u16,
+        max_partition: u16,
+    ) -> (Self, Receiver<(u32, Packet)>) {
+        let (packet_sender, packet_receiver) = mpsc::channel();
         (
             Self {
                 max_pid: max_partition,
                 max_cid: max_client_per_partition,
                 clients_partition: HashMap::new(),
                 free_id: HashSet::new(),
-                event_sender,
+                packet_sender,
             },
-            event_receiver,
+            packet_receiver,
         )
     }
 
@@ -47,10 +49,12 @@ impl ClientManager {
         None
     }
 
+    #[inline(always)]
     fn merge_id(pid: u16, cid: u16) -> u32 {
         ((pid as u32) << 16) | cid as u32
     }
 
+    #[inline(always)]
     fn split_id(id: u32) -> (u16, u16) {
         ((id >> 16) as u16, id as u16)
     }
@@ -58,7 +62,7 @@ impl ClientManager {
     fn handle_partition(
         pid: u16,
         clients: Arc<Mutex<HashMap<u16, Client>>>,
-        event_sender: Sender<Event>,
+        packet_sender: Sender<(u32, Packet)>,
     ) {
         loop {
             if let Ok(mut clients) = clients.lock() {
@@ -68,11 +72,9 @@ impl ClientManager {
                 for (&cid, client) in clients.iter_mut() {
                     match client.read_packet() {
                         Ok(packet) => {
-                            let event = Event::ClientSendPacket {
-                                client_id: Self::merge_id(pid, cid),
-                                packet,
-                            };
-                            event_sender.send(event).expect("Error while sending event");
+                            packet_sender
+                                .send((Self::merge_id(pid, cid), packet))
+                                .expect("Error while sending event");
                         }
                         Err(err) => eprintln!("[{pid:04x}_{cid:04x}] {err:?}"),
                     }
@@ -83,22 +85,21 @@ impl ClientManager {
         }
     }
 
-    pub fn add_client(&mut self, client_stream: TcpStream) -> Option<u32> {
+    pub fn add_client(&mut self, client: Client) -> Option<u32> {
         let (pid, cid) = self.next_id()?;
         let id = Self::merge_id(pid, cid);
-        let client = Client::new(id, client_stream).expect("cannot create client"); // ??
         match self.clients_partition.get_mut(&pid) {
             Some(partition) => {
                 partition.lock().unwrap().insert(cid, client);
             }
             None => {
                 let mut partition = HashMap::new();
-                partition.insert(cid, client);
+                partition.insert(cid, client.try_clone());
                 let partition = Arc::new(Mutex::new(partition));
                 self.clients_partition.insert(pid, partition.clone());
                 let partition = partition.clone();
-                let event_sender = self.event_sender.clone();
-                std::thread::spawn(move || Self::handle_partition(pid, partition, event_sender));
+                let packet_sender = self.packet_sender.clone();
+                std::thread::spawn(move || Self::handle_partition(pid, partition, packet_sender));
             }
         }
         Some(id)

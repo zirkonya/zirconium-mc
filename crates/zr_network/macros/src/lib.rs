@@ -101,7 +101,7 @@ pub fn listener(_: TokenStream, input: TokenStream) -> TokenStream {
         }
     }
     let match_pattern = parse_match(blocks);
-    quote! {
+    let gen = quote! {
         impl #generics Listener for #self_ty {
             fn handle_event(&mut self, event: &Event) -> Result<(), Box<dyn Error>> {
                 #match_pattern
@@ -109,5 +109,7 @@ pub fn listener(_: TokenStream, input: TokenStream) -> TokenStream {
             }
         }
     }
-    .into()
+    .into();
+    println!("{gen}");
+    gen
 }
