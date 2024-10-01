@@ -10,6 +10,8 @@ repository = "https://github.com/zirkonya/zirconium-mc"
 zr_binary = { version = "0.1.0", path = "crates/zr_binary" }
 zr_protocol = { version = "0.1.0", path = "crates/zr_protocol" }
 zr_network = { version = "0.1.0", path = "crates/zr_network" }
+zr_core = { path = "crates/zr_core" }
+uuid = { version = "1.10.0", features = ["serde"] }
 
 [workspace]
 members = [
