@@ -5,6 +5,8 @@ edition = "2021"
 authors = ["zirkonya"]
 license = "GPL-3.0-only" 
 repository = "https://github.com/zirkonya/zirconium-mc"
+uuid = "1.10.0"
 
 [dependencies]
 serde = "1.0.203"
+uuid = "1.10.0"
