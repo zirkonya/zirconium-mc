@@ -1,6 +1,6 @@
 use std::io::{self, Write};
 
-use flate2::{write::ZlibEncoder, Compression};
+use flate2::{write::{ZlibEncoder, ZlibDecoder}, Compression};
 use zr_binary::{binary::Binary, varint::VarInt};
 
 use super::packet::Packet;
@@ -29,6 +29,17 @@ impl CompressedPacket {
         Ok(Self {
             data_length: date_length.into(),
             compressed_packet,
+        })
+    }
+
+    pub fn decompress(self) -> io::Result<Packet> {
+        Ok(if self.data_length.0 == 0_i32 {
+            Packet::from_binary(self.compressed_packet).unwrap()
+        } else {
+            let mut decoder = ZlibDecoder::new(Vec::new());
+            decoder.write_all(&self.compressed_packet)?;
+            let binary = decoder.finish()?;
+            Packet::from_binary(binary).unwrap()
         })
     }
 }

@@ -1,13 +1,29 @@
 use super::{compressed::CompressedPacket, PacketData};
 use crate::error::packet::PacketError;
 use flate2::Compression;
+use std::fmt::Debug;
 use std::io;
 use zr_binary::{binary::Binary, varint::VarInt};
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Clone, Eq, PartialEq)]
 pub struct Packet {
     pub(super) id: VarInt<i32>,
     pub(super) data: Vec<u8>,
+}
+
+impl Debug for Packet {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Packet {{ id: {:02x}, data: {} }}",
+            self.id.0,
+            self.data
+                .iter()
+                .map(|x| format!("{x:02x}"))
+                .collect::<Vec<String>>()
+                .join(".")
+        )
+    }
 }
 
 impl Packet {

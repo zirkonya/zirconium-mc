@@ -3,7 +3,7 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-use crate::{client::Client, packet::packet::Packet};
+use crate::{client::client::Client, packet::packet::Packet};
 
 #[derive(Debug)]
 pub enum Event {
