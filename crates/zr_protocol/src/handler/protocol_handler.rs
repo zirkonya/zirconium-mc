@@ -162,8 +162,6 @@ impl Handler for ProtocolHandler {
         Self: Sized,
     {
         std::thread::spawn(move || loop {
-            // yield ?
-            // std::thread::yield_now();
             match handler.try_lock() {
                 Ok(mut handler) => match handler.receiver.try_recv() {
                     Ok((client_id, packet)) => {

@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use zr_binary_macros::Binary;
 use zr_nbt::either::Either;
 
-#[derive(Binary, Deserialize, Serialize)]
+#[derive(Clone, Deserialize, Serialize)]
 pub struct ArmorTrimMaterial {
     pub asset_name: String,
     pub ingredient: String,

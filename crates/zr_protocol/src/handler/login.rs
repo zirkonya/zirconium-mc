@@ -57,11 +57,10 @@ impl LoginProtocol {
         Next::SendPackets(vec![
             config::server::KnownPacks { known_pack: vec![] }.to_packet(),
             config::server::RegistryData {
-                registry_codec: serde_json::from_str::<Nbt<HashMap<String, Registry>>>(
-                    include_str!(
-                        "/home/zirkonya/Desktop/workspace/rust/minecraft-server/1.20.6.json"
-                    ),
-                )
+                // TODO : remove hard json file
+                registry_codec: serde_json::from_str::<Nbt<Registry>>(include_str!(
+                    "/home/zirkonya/Desktop/workspace/rust/minecraft-server/1.20.6.json"
+                ))
                 .unwrap(),
             }
             .to_packet(),

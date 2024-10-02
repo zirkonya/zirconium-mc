@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use zr_binary::varint::VarInt;
 use zr_binary_macros::Binary;
 use zr_nbt::Nbt;
@@ -10,7 +8,7 @@ use super::registry::Registry;
 #[derive(Binary, Packet)]
 #[id = 0x07]
 pub struct RegistryData {
-    pub(crate) registry_codec: Nbt<HashMap<String, Registry>>,
+    pub(crate) registry_codec: Nbt<Registry>,
 }
 
 #[derive(Binary, Clone)]

@@ -47,7 +47,7 @@ pub struct Players {
 #[serde(rename_all = "camelCase")]
 pub struct Sample {
     pub name: String,
-    pub id: Uuid,
+    pub id: u128,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize)]
