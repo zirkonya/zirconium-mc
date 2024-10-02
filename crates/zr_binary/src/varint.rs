@@ -1,8 +1,11 @@
 use std::{
-    fmt::Debug,
+    fmt::{Debug, Write},
+    i32,
     io::Read,
     ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
 };
+
+use serde::{de::Visitor, Deserialize, Serialize};
 
 use crate::{binary::Binary, error::BinaryError};
 
@@ -220,6 +223,79 @@ impl Binary for VarInt<i64> {
                 break Err(BinaryError::FormatError);
             }
         }
+    }
+}
+
+pub struct VarIntVisitor;
+pub struct VarLongVisitor;
+
+impl<'de> Visitor<'de> for VarIntVisitor {
+    type Value = i32;
+
+    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        formatter.write_str(format!("an integer between {} and {}", i32::MIN, i32::MAX).as_str())
+    }
+
+    fn visit_i32<E>(self, v: i32) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        Ok(v)
+    }
+}
+
+impl<'de> Visitor<'de> for VarLongVisitor {
+    type Value = i64;
+
+    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        formatter.write_str(format!("an integer between {} and {}", i64::MIN, i64::MAX).as_str())
+    }
+
+    fn visit_i64<E>(self, v: i64) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        Ok(v)
+    }
+}
+
+impl Serialize for VarInt<i32> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_i32(self.0)
+    }
+}
+
+impl Serialize for VarInt<i64> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_i64(self.0)
+    }
+}
+
+impl<'de> Deserialize<'de> for VarInt<i32> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        deserializer
+            .deserialize_i32(VarIntVisitor)
+            .map(|i| VarInt(i))
+    }
+}
+
+impl<'de> Deserialize<'de> for VarInt<i64> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        deserializer
+            .deserialize_i64(VarLongVisitor)
+            .map(|i| VarInt(i))
     }
 }
 
