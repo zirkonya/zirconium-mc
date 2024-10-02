@@ -44,7 +44,7 @@ impl Packet {
         threshold: usize,
         compression: Compression,
     ) -> io::Result<CompressedPacket> {
-        if self.binary_len() <= threshold {
+        if self.binary_len() < threshold {
             Ok(CompressedPacket::uncompressed(self))
         } else {
             CompressedPacket::compressed(self, compression)

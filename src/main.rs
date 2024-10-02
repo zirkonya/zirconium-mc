@@ -5,7 +5,10 @@ use std::{
 };
 
 use zr_core::handler::Handler;
-use zr_network::client::{client::Client, manager::ClientManager};
+use zr_network::client::{
+    client::{Client, COMPRESSION_ACTIVE},
+    manager::ClientManager,
+};
 use zr_protocol::handler::protocol_handler::ProtocolHandler;
 
 const SERVER_ADDRESS: &str = "127.0.0.1:25565";
@@ -21,7 +24,7 @@ pub fn main() {
         for stream in listener.incoming() {
             if let Ok(stream) = stream {
                 let mut protocol_handler = protocol_handler.lock().unwrap();
-                let client = Client::new(stream).unwrap();
+                let client = Client::new_with_opt(stream, COMPRESSION_ACTIVE).unwrap();
                 if let Some(id) =
                     ClientManager::add_client(client_manager.clone(), client.try_clone().unwrap())
                 {

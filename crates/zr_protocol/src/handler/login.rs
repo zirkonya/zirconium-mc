@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use super::{
     handler::{Next, PacketHandler},
     protocol_handler::{Client, State},
@@ -12,7 +10,7 @@ use rsa::{pkcs8::EncodePublicKey, RsaPrivateKey, RsaPublicKey};
 use zr_binary::varint::VarInt;
 use zr_core::entity::player::Player;
 use zr_nbt::Nbt;
-use zr_network::packet::PacketData;
+use zr_network::{error::network::NetworkError, packet::PacketData};
 
 const RSA_KEY_BITS: usize = 1024;
 
@@ -37,7 +35,7 @@ impl LoginProtocol {
     }
 
     pub fn public_key_der(&self) -> Vec<u8> {
-        // TODO : remove unwrap
+        // TODO : handle error
         self.key_pair.1.to_public_key_der().unwrap().to_vec()
     }
 
@@ -67,10 +65,22 @@ impl LoginProtocol {
         ])
     }
 
-    fn on_encryption_response(&self, player: Player) -> Next {
+    fn on_encryption_response(
+        &self,
+        client: &mut Client,
+        player: Player,
+    ) -> Result<Next, NetworkError> {
         let uuid = player.uuid();
         let username = player.name();
-        Next::SendPackets(vec![
+        client.send_packet(
+            server::SetCompression {
+                threshold: VarInt::new(2048),
+            }
+            .to_packet(),
+        )?;
+
+        client.active_compression();
+        Ok(Next::SendPacket(
             server::LoginSuccess {
                 uuid,
                 username,
@@ -78,11 +88,7 @@ impl LoginProtocol {
                 strict_error_handling: false,
             }
             .to_packet(),
-            server::SetCompression {
-                threshold: VarInt::new(512),
-            }
-            .to_packet(),
-        ])
+        ))
     }
 
     fn wrong_packet_id(&self) -> Next {
@@ -96,6 +102,7 @@ impl LoginProtocol {
     }
 }
 
+// TODO : complete login protocol
 impl PacketHandler for LoginProtocol {
     fn handle_packet(
         &mut self,
@@ -108,12 +115,13 @@ impl PacketHandler for LoginProtocol {
             {
                 let login_start = client::LoginStart::from_packet(packet).unwrap();
                 client.player = Some(Player::new(login_start.player_uuid, login_start.name));
-                self.on_encryption_response(client.player().clone().unwrap())
+                self.on_encryption_response(client, client.player().clone().unwrap())
+                    .unwrap()
             }
             client::EncryptionResponse::ID => {
                 // TODO : add set compression
                 let player = client.player().clone().unwrap();
-                self.on_encryption_response(player)
+                self.on_encryption_response(client, player).unwrap()
             }
             client::LoginAcknowledge::ID => self.on_login_acknowledge(client),
             client::LoginPluginResponse::ID => Next::Wait,

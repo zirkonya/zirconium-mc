@@ -3,7 +3,7 @@ use crate::{
     packet::compressed::CompressedPacket,
     packet::packet::Packet,
 };
-use flate2::Compression;
+use flate2::{Compress, Compression};
 use std::{
     io::{Error, Read, Write},
     net::TcpStream,
@@ -17,9 +17,9 @@ use zr_binary::{
 const MAX_SIZE: usize = 2_097_149;
 
 const CIPHER_ENABLE: u8 = 0b0000_0001;
-const CIPHER_ACTIVE: u8 = 0b0000_0010;
+pub const CIPHER_ACTIVE: u8 = 0b0000_0010;
 const COMPRESSION_ENABLE: u8 = 0b0000_0100;
-const COMPRESSION_ACTIVE: u8 = 0b0000_1000;
+pub const COMPRESSION_ACTIVE: u8 = 0b0000_1000;
 
 // TODO : Add cipher & compression
 #[derive(Debug)]
@@ -33,6 +33,10 @@ pub struct Client {
 
 impl Client {
     pub fn new(stream: TcpStream) -> Result<Self, Error> {
+        Self::new_with_opt(stream, 0)
+    }
+
+    pub fn new_with_opt(stream: TcpStream, opt: u8) -> Result<Self, Error> {
         stream.set_nonblocking(true)?;
         let mut aes_key = [0_u8; 16];
         for i in 0..16 {
@@ -41,9 +45,9 @@ impl Client {
         Ok(Self {
             stream,
             threshold: MAX_SIZE,
-            compression: flate2::Compression::best(),
+            compression: flate2::Compression::default(),
             aes_key,
-            opt: 0b0000_0000,
+            opt,
         })
     }
 
@@ -123,6 +127,18 @@ impl Client {
         };
         self.stream.write(&data).map_err(NetworkError::IOError)?;
         Ok(())
+    }
+
+    pub fn active_compression(&mut self) {
+        if self.is_compression_active() {
+            self.opt |= COMPRESSION_ENABLE;
+        }
+    }
+
+    pub fn active_cipher(&mut self) {
+        if self.is_cipher_active() {
+            self.opt |= COMPRESSION_ENABLE;
+        }
     }
 
     pub fn try_clone(&self) -> std::io::Result<Self> {

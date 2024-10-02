@@ -1,6 +1,7 @@
 // Client <=> ID <=> UUID <=> Player <=> Pseudo
 use std::{
     collections::HashMap,
+    io,
     sync::{mpsc::Receiver, Arc, RwLock},
 };
 use zr_core::{entity::player::Player, handler::Handler};
@@ -39,6 +40,10 @@ impl Client {
         }
     }
 
+    pub fn send_packet(&mut self, packet: Packet) -> Result<(), NetworkError> {
+        self.client.write_packet(packet)
+    }
+
     pub fn change_state(&mut self, state: State) {
         println!("[!] {state:?}");
         self.state = state;
@@ -50,6 +55,10 @@ impl Client {
 
     pub fn player_name(&self) -> Option<String> {
         self.player.as_ref().map(|player| player.name())
+    }
+
+    pub fn active_compression(&mut self) {
+        self.client.active_compression();
     }
 }
 
@@ -142,8 +151,7 @@ impl ProtocolHandler {
                     self.clients
                         .get_mut(&client_id)
                         .unwrap()
-                        .client
-                        .write_packet(packet)?;
+                        .send_packet(packet)?;
                 }
             }
             Next::UpdateClient(update) => update(self.clients.get_mut(&client_id).unwrap()),

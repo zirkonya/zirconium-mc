@@ -1,6 +1,9 @@
-use std::io::{self, Write};
+use std::io::{self, Read};
 
-use flate2::{write::{ZlibEncoder, ZlibDecoder}, Compression};
+use flate2::{
+    bufread::{ZlibDecoder, ZlibEncoder},
+    Compress, Compression,
+};
 use zr_binary::{binary::Binary, varint::VarInt};
 
 use super::packet::Packet;
@@ -22,9 +25,14 @@ impl CompressedPacket {
     pub fn compressed(origin: Packet, compression: Compression) -> io::Result<Self> {
         let date_length = origin.binary_len() as i32; // TODO : verify is size is valid
         let compressed_packet = {
-            let mut encoder = ZlibEncoder::new(Vec::new(), compression);
-            encoder.write_all(&origin.to_binary())?;
-            encoder.finish()?
+            let mut binary: Vec<u8> = Vec::new();
+            let bin_packet = origin.to_binary();
+            let mut encoder = ZlibEncoder::new_with_compress(
+                bin_packet.as_slice(),
+                Compress::new(compression, true),
+            );
+            encoder.read_to_end(&mut binary)?;
+            binary
         };
         Ok(Self {
             data_length: date_length.into(),
@@ -33,12 +41,13 @@ impl CompressedPacket {
     }
 
     pub fn decompress(self) -> io::Result<Packet> {
+        println!("GET COMPRESSED");
         Ok(if self.data_length.0 == 0_i32 {
             Packet::from_binary(self.compressed_packet).unwrap()
         } else {
-            let mut decoder = ZlibDecoder::new(Vec::new());
-            decoder.write_all(&self.compressed_packet)?;
-            let binary = decoder.finish()?;
+            let mut binary: Vec<u8> = Vec::new();
+            let mut decoder = ZlibDecoder::new(self.compressed_packet.as_slice());
+            decoder.read_to_end(&mut binary)?;
             Packet::from_binary(binary).unwrap()
         })
     }

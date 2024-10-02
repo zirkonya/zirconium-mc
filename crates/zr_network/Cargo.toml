@@ -7,9 +7,9 @@ license = "GPL-3.0-only"
 repository = "https://github.com/zirkonya/zirconium-mc"
 
 [dependencies]
-flate2 = "1.0.30"
 rand = "0.8.5"
 zr_core = { path = "../zr_core" }
 zr_binary = { path = "../zr_binary" }
 zr_network_macros = { path = "./macros" }
 libaes = "0.7.0"
+flate2 = "1.0.34"
