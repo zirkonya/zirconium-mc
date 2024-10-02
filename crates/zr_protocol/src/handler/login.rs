@@ -34,20 +34,22 @@ impl LoginProtocol {
         })
     }
 
-    pub fn public_key_der(&self) -> Vec<u8> {
-        // TODO : handle error
-        self.key_pair.1.to_public_key_der().unwrap().to_vec()
+    pub fn public_key_der(&self) -> Result<Vec<u8>, rsa::pkcs8::spki::Error> {
+        self.key_pair.1.to_public_key_der().map(|d| d.to_vec())
     }
 
     fn on_login_start(&self) -> Next {
-        Next::SendPacket(
-            server::EncryptionRequest {
-                server_id: String::new(),
-                public_key: self.public_key_der(),
-                verify_token: self.verify_token.to_vec(),
-            }
-            .to_packet(),
-        )
+        match self.public_key_der() {
+            Ok(public_key) => Next::SendPacket(
+                server::EncryptionRequest {
+                    server_id: String::new(),
+                    public_key,
+                    verify_token: self.verify_token.to_vec(),
+                }
+                .to_packet(),
+            ),
+            Err(_) => Next::Disconnect,
+        }
     }
 
     fn on_login_acknowledge(&self, client: &mut Client) -> Next {
@@ -119,7 +121,6 @@ impl PacketHandler for LoginProtocol {
                     .unwrap()
             }
             client::EncryptionResponse::ID => {
-                // TODO : add set compression
                 let player = client.player().clone().unwrap();
                 self.on_encryption_response(client, player).unwrap()
             }

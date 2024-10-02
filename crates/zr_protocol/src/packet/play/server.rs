@@ -1,91 +1,93 @@
-use zr_binary::binary::varint::VarInt;
+use uuid::Uuid;
+use zr_binary::varint::VarInt;
 use zr_binary_macros::Binary;
 use zr_network_macros::Packet;
-
-pub type Uuid = u128;
 
 #[derive(Binary, Packet)]
 #[id = 0x00]
 pub struct BundleDelimiter;
 
+pub type Vector3d = f64;
+pub type Vector3<T> = T;
+
 #[derive(Binary, Packet)]
 #[id = 0x01]
 pub struct SpawnEntity {
-	pub(crate) entity_id: VarInt<i32>,
-	pub(crate) entity_uuid: Uuid,
-	pub(crate) entity_type: VarInt<i32>,
-	pub(crate) coordinate: Vector3d,
-	pub(crate) pitch: u8,
-	pub(crate) yaw: u8,
-	pub(crate) head_yaw: u8,
-	pub(crate) data: VarInt<i32>,
-	pub(crate) velocity: Vector3<i16>,
+    pub(crate) entity_id: VarInt<i32>,
+    pub(crate) entity_uuid: Uuid,
+    pub(crate) entity_type: VarInt<i32>,
+    pub(crate) coordinate: Vector3d,
+    pub(crate) pitch: u8,
+    pub(crate) yaw: u8,
+    pub(crate) head_yaw: u8,
+    pub(crate) data: VarInt<i32>,
+    pub(crate) velocity: Vector3<i16>,
 }
 
 #[derive(Binary, Packet)]
 #[id = 0x02]
 pub struct SpawnExperienceOrb {
-	pub(crate) entity_id: VarInt<i32>,
-	pub(crate) coordinate: Vector3d,
-	pub(crate) count: i16,
+    pub(crate) entity_id: VarInt<i32>,
+    pub(crate) coordinate: Vector3d,
+    pub(crate) count: i16,
 }
 
 #[derive(Binary, Packet)]
 #[id = 0x03]
 pub struct EntityAnimation {
-	pub(crate) entity_id: VarInt<i32>,
-	pub(crate) animation: u8,
+    pub(crate) entity_id: VarInt<i32>,
+    pub(crate) animation: u8,
 }
 
-#[derive(Debug, ToBinary, Clone)]
+#[derive(Debug, Binary, Clone)]
 pub struct Statistic {
-	pub(crate) category_id: VarInt<i32>,
-	pub(crate) statistic_id: VarInt<i32>,
-	pub(crate) value: VarInt<i32>,
+    pub(crate) category_id: VarInt<i32>,
+    pub(crate) statistic_id: VarInt<i32>,
+    pub(crate) value: VarInt<i32>,
 }
 
 #[derive(Binary, Packet)]
 #[id = 0x04]
 pub struct AwardStatistics {
-	pub(crate) statistic: Array<Statistic>,
+    pub(crate) statistic: Vec<Statistic>,
 }
 
 #[derive(Binary, Packet)]
 #[id = 0x05]
 pub struct AcknowledgeBlockChange {
-	pub(crate) sequence_id: VarInt<i32>,
+    pub(crate) sequence_id: VarInt<i32>,
 }
 
 #[derive(Binary, Packet)]
 #[id = 0x06]
 pub struct SetBlockDestroyStage {
-	pub(crate) entity_id: VarInt<i32>,
-	pub(crate) location: Position,
-	pub(crate) destroy_stage: i8,
+    pub(crate) entity_id: VarInt<i32>,
+    pub(crate) location: Position,
+    pub(crate) destroy_stage: i8,
 }
 
 #[derive(Binary, Packet)]
 #[id = 0x07]
 pub struct BlockEntityData {
-	pub(crate) location: Position,
-	pub(crate) entity_block_type: VarInt<i32>,
-	pub(crate) nbt_tag: (),
+    pub(crate) location: Position,
+    pub(crate) entity_block_type: VarInt<i32>,
+    pub(crate) nbt_tag: (),
 }
 
 #[derive(Binary, Packet)]
 #[id = 0x08]
 pub struct BlockAction {
-	pub(crate) location: Position,
-	pub(crate) action_id: u8,
-	pub(crate) action_parameter: u8,
-	pub(crate) block_type: VarInt<i32>,
+    pub(crate) location: Position,
+    pub(crate) action_id: u8,
+    pub(crate) action_parameter: u8,
+    pub(crate) block_type: VarInt<i32>,
 }
 
 #[derive(Binary, Packet)]
 #[id = 0x09]
 pub struct BlockUpdate {
-	pub(crate) location: Position,
-	pub(crate) block_id: VarInt<i32>,
+    pub(crate) location: Position,
+    pub(crate) block_id: VarInt<i32>,
 }
 
 #[derive(Binary, Packet)]
@@ -97,8 +99,8 @@ pub struct BossBar {
 #[derive(Binary, Packet)]
 #[id = 0x0B]
 pub struct ChangeDifficulty {
-	pub(crate) difficulty: u8,
-	pub(crate) difficulty_locked: bool,
+    pub(crate) difficulty: u8,
+    pub(crate) difficulty_locked: bool,
 }
 
 #[derive(Binary, Packet)]
@@ -111,17 +113,17 @@ pub struct ChunkBatchStart;
 
 #[derive(Debug, Binary, Clone)]
 pub struct ChunkBiomeData {
-	pub(crate) chunk_z: i32,
-	pub(crate) chunk_x: i32,
+    pub(crate) chunk_z: i32,
+    pub(crate) chunk_x: i32,
     #[prefixed_length = "VarInt<i32>"]
-	pub(crate) data: Vec<u8>,
+    pub(crate) data: Vec<u8>,
 }
 
 #[derive(Binary, Packet)]
 #[id = 0x0E]
 pub struct ChunkBiomes {
     #[prefixed_length = "VarInt<i32>"]
-	pub(crate) chunk_biome_data: Vec<ChunkBiomeData>,
+    pub(crate) chunk_biome_data: Vec<ChunkBiomeData>,
 }
 
 #[derive(Binary, Packet)]
@@ -152,7 +154,7 @@ pub struct CommandSuggestionsResponse {
 pub struct Commands {
     #[prefixed_length = "VarInt<i32>"]
     pub(crate) node: Vec<String>, // TODO : Node (commands)
-    #[prefixed_length = "VarInt<i32>"]
+    // #[prefixed_length = "VarInt<i32>"]
     pub(crate) root_index: VarInt<i32>,
 }
 
@@ -229,7 +231,7 @@ pub struct DamageEvent {
 #[id = 0x1A]
 pub struct DeleteMessage {
     pub(crate) message_id: VarInt<i32>,
-    pub(crate) signature: Option<Array<u8>>,
+    pub(crate) signature: Option<Vec<u8>>,
 }
 
 #[derive(Binary, Packet)]
@@ -256,7 +258,7 @@ pub struct EntityEvent {
     pub(crate) entity_statue: u8, // TODO : enum
 }
 
-pub type Particle = String;// TODO : particle
+pub type Particle = String; // TODO : particle
 
 #[derive(Binary, Packet)]
 #[id = 0x1E]
@@ -297,3 +299,4 @@ pub struct OpenHorseScreen {
     pub(crate) slot_count: VarInt<i32>,
     pub(crate) entity_id: i32,
 }
+

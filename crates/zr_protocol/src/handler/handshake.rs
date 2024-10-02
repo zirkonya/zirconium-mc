@@ -21,11 +21,11 @@ impl PacketHandler for HandshakeProtocol {
             next_state,
         }) = Handshake::from_packet(packet)
         {
-            // TODO : check protocol_version
+            // TODO : check protocol version
             match next_state.0 {
                 1 => Next::UpdateClient(|client| client.change_state(State::Status)),
                 2 => Next::UpdateClient(|client| client.change_state(State::Login)),
-                3 => Next::Disconnect, // TODO : Transfer ?
+                3 => Next::Disconnect,
                 _ => Next::Disconnect,
             }
         } else {

@@ -27,7 +27,6 @@ pub struct DimensionType {
     ambient_light: f32,
     piglin_safe: i8,
     has_raids: i8,
-    // TODO : monster_spawn_light_level
     monster_spawn_light_level: Either<i32, Probability>,
     monster_spawn_block_light_limit: i32,
 }

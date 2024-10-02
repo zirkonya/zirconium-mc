@@ -1,7 +1,5 @@
-// Client <=> ID <=> UUID <=> Player <=> Pseudo
 use std::{
     collections::HashMap,
-    io,
     sync::{mpsc::Receiver, Arc, RwLock},
 };
 use zr_core::{entity::player::Player, handler::Handler};
@@ -132,12 +130,11 @@ impl ProtocolHandler {
         match next {
             Next::Disconnect => {
                 self.clients
-                    .get_mut(&client_id)
+                    .remove(&client_id)
                     .unwrap()
                     .client
                     .shutdown()
                     .map_err(|err| NetworkError::IOError(err))?;
-                // TODO : remove client
             }
             Next::Wait => {}
             Next::SendPacket(packet) => self
@@ -173,9 +170,9 @@ impl Handler for ProtocolHandler {
             match handler.try_lock() {
                 Ok(mut handler) => match handler.receiver.try_recv() {
                     Ok((client_id, packet)) => {
-                        handler
-                            .handle_packet(client_id, packet)
-                            .expect("flemme de gerer l'erreur"); // TODO : ne plus avoir la flemme
+                        if let Err(err) = handler.handle_packet(client_id, packet) {
+                            eprintln!("Error on : [{client_id:08x}] {err:?}");
+                        }
                     }
                     Err(_) => continue,
                 },

@@ -3,7 +3,7 @@ use crate::{
     packet::compressed::CompressedPacket,
     packet::packet::Packet,
 };
-use flate2::{Compress, Compression};
+use flate2::Compression;
 use std::{
     io::{Error, Read, Write},
     net::TcpStream,
@@ -93,7 +93,8 @@ impl Client {
             buf.to_vec()
         };
         let packet = if self.is_compression_enable() {
-            let compressed = CompressedPacket::from_binary(data).unwrap(); // TODO : handle error
+            let compressed = CompressedPacket::from_binary(data)
+                .map_err(|err| NetworkError::PacketError(PacketError::DataError(err)))?;
             compressed.decompress().map_err(NetworkError::IOError)
         } else {
             Packet::from_binary(data)
@@ -143,7 +144,7 @@ impl Client {
 
     pub fn try_clone(&self) -> std::io::Result<Self> {
         Ok(Self {
-            stream: self.stream.try_clone()?, // TODO : handle error
+            stream: self.stream.try_clone()?,
             aes_key: self.aes_key.clone(),
             compression: self.compression.clone(),
             threshold: self.threshold,

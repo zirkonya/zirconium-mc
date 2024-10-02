@@ -23,7 +23,7 @@ impl CompressedPacket {
     }
 
     pub fn compressed(origin: Packet, compression: Compression) -> io::Result<Self> {
-        let date_length = origin.binary_len() as i32; // TODO : verify is size is valid
+        let date_length = origin.binary_len() as i32;
         let compressed_packet = {
             let mut binary: Vec<u8> = Vec::new();
             let bin_packet = origin.to_binary();

@@ -160,7 +160,9 @@ impl ClientManager {
     pub fn remove_client(&mut self, client_id: u32) {
         let (pid, cid) = Self::split_id(client_id);
         let mut client = self.remove_client_inner(pid, cid);
-        client.shutdown().expect("Error while shutdown client"); // TODO : handle error
+        if let Err(err) = client.shutdown() {
+            eprintln!("{err:?}");
+        }
         if self.clients_partition[&pid].lock().unwrap().is_empty() {
             self.remove_partition(pid);
         }
