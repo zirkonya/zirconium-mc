@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use armor_trim::{material::ArmorTrimMaterial, pattern::ArmorTrimPattern};
 use banner_pattern::BannerPattern;
 use biome::Biome;
@@ -8,6 +6,7 @@ use damage_type::DamageType;
 use dimension_type::DimensionType;
 use painting_variant::PaintingVariant;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use wolf_variant::WolfVariant;
 
 pub mod armor_trim;
@@ -22,23 +21,23 @@ pub mod wolf_variant;
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Registry {
     #[serde(rename = "minecraft:trim_material")]
-    armor_trim_material: HashMap<String, ArmorTrimMaterial>,
+    armor_trim_material: Option<HashMap<String, ArmorTrimMaterial>>,
     #[serde(rename = "minecraft:trim_pattern")]
-    armor_trim_pattern: HashMap<String, ArmorTrimPattern>,
+    armor_trim_pattern: Option<HashMap<String, ArmorTrimPattern>>,
     #[serde(rename = "minecraft:banner_pattern")]
-    banner_pattern: HashMap<String, BannerPattern>,
+    banner_pattern: Option<HashMap<String, BannerPattern>>,
     #[serde(rename = "minecraft:worldgen/biome")]
-    biome: HashMap<String, Biome>,
+    biome: Option<HashMap<String, Biome>>,
     #[serde(rename = "minecraft:chat_type")]
-    chat_type: HashMap<String, ChatType>,
+    chat_type: Option<HashMap<String, ChatType>>,
     #[serde(rename = "minecraft:damage_type")]
-    damage_type: HashMap<String, DamageType>,
+    damage_type: Option<HashMap<String, DamageType>>,
     #[serde(rename = "minecraft:dimension_type")]
-    dimension_type: HashMap<String, DimensionType>,
+    dimension_type: Option<HashMap<String, DimensionType>>,
     #[serde(rename = "minecraft:wolf_variant")]
-    wolf_variant: HashMap<String, WolfVariant>,
+    wolf_variant: Option<HashMap<String, WolfVariant>>,
     #[serde(rename = "minecraft:painting_variant")]
-    painting_variant: HashMap<String, PaintingVariant>,
+    painting_variant: Option<HashMap<String, PaintingVariant>>,
 }
 
 #[cfg(test)]
@@ -55,6 +54,5 @@ pub mod test {
         let nbt: Nbt<Registry> = serde_json::from_str::<Nbt<Registry>>(json).unwrap();
         let json_2 = serde_json::to_string(&nbt).unwrap();
         println!("{json_2}");
-        assert!(false);
     }
 }
