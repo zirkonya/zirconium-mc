@@ -1,8 +1,10 @@
+use serde::{Deserialize, Serialize};
 use zr_binary::varint::VarInt;
 
 pub type Slot = (); // TODO : item
 pub type Position = (); // TODO : position
 
+#[derive(Clone, Serialize, Deserialize)]
 pub enum Particle {
     AngryVillager,
     Block {
