@@ -229,7 +229,7 @@ impl<L, T> ToBytes for PrefixedLen<L, T> where L: Into<usize> + From<usize> + To
         let len: usize = prefix_length.into();
         let end = cursor + len;
         let (size, data) = T::from_bytes(&bytes[cursor..end])?;
-        Ok((size, Self::new(data)))
+        Ok((cursor + size, Self::new(data)))
     }
 }
 

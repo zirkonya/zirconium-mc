@@ -1,4 +1,4 @@
-use crate::{packet::{direction::PacketDirection, state::PacketState}, parser::binary::ToBytes, varint::VarInt};
+use crate::{packet::{direction::PacketDirection, state::PacketState}, parser::binary::ToBytes};
 
 pub mod state;
 pub mod direction;
@@ -11,12 +11,8 @@ pub trait PacketData {
     const STATE: PacketState;
     const DIRECTION: PacketDirection;
 
-    fn serialize(self) -> Packet<Self> where Self: Sized + ToBytes {
-        todo!()
-    }
-
-    fn deserialize(bytes: &[u8]) -> Self {
-        todo!()
+    fn to_packet(self) -> Packet<Self> where Self: ToBytes + Sized {
+        Packet::new(Self::ID, self)
     }
 
     fn packet_name() -> &'static str;

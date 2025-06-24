@@ -44,6 +44,9 @@ version = "0.1.0"
 [[package]]
 name = "zr_protocol"
 version = "0.1.0"
+dependencies = [
+ "zr_protocol_macros",
+]
 
 [[package]]
 name = "zr_protocol_macros"
