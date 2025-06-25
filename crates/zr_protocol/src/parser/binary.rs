@@ -8,7 +8,8 @@ pub struct PrefixedLen<L, T> where L: Into<usize> + From<usize> + ToBytes, T: To
 }
 
 impl<L, T> PrefixedLen<L, T> where L: Into<usize> + From<usize> + ToBytes, T: ToBytes {
-    pub fn new(data: T) -> Self {
+    pub fn new<P>(data: P) -> Self where P: Into<T> {
+        let data: T = data.into();
         Self { size: data.bytes_len().into(), data }
     }
 
@@ -211,6 +212,22 @@ impl<T> ToBytes for Vec<T> where T: ToBytes {
     }
 }
 
+impl ToBytes for String {
+    fn bytes_len(&self) -> usize {
+        self.len()
+    }
+
+    fn to_bytes<B>(&self) -> Result<(usize, B), ()> where B: From<Vec<u8>> {
+        Ok((self.bytes_len(), B::from(self.bytes().collect::<Vec<u8>>())))
+    }
+
+    fn from_bytes<B>(bytes: B) -> Result<(usize, Self), ()> where B: Into<Vec<u8>>, Self: Sized {
+        let string = String::from_utf8(bytes.into()).map_err(|_| ())?;
+        let size = string.len();
+        Ok((size, string))
+    }
+}
+
 impl<L, T> ToBytes for PrefixedLen<L, T> where L: Into<usize> + From<usize> + ToBytes, T: ToBytes {
     fn bytes_len(&self) -> usize {
         self.data.bytes_len() + self.size.bytes_len()
@@ -233,6 +250,23 @@ impl<L, T> ToBytes for PrefixedLen<L, T> where L: Into<usize> + From<usize> + To
     }
 }
 
+#[cfg(test)]
 mod tests {
+    use crate::{parser::binary::{PrefixedLen, ToBytes}, varint::VarInt};
 
+    #[test]
+    fn test_slice() {
+        let slice = [1u8, 2, 3, 4];
+        let (count, bytes): (_, Vec<u8>) = slice.to_bytes().unwrap();
+        assert_eq!(count, 4);
+        assert_eq!(bytes, vec![1u8, 2, 3, 4]);
+    }
+
+    #[test]
+    fn test_prefixed_len() {
+        let slice = PrefixedLen::<VarInt<i32>, Vec<u8>>::new(vec![1u8, 2, 3, 4]);
+        let (count, bytes): (_, Vec<u8>) = slice.to_bytes().unwrap();
+        assert_eq!(count, 5);
+        assert_eq!(bytes, vec![4u8, 1, 2, 3, 4]);
+    }
 }
