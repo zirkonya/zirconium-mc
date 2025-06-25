@@ -1,6 +1,6 @@
-use proc_macro::{Ident, TokenStream};
-use quote::{quote, ToTokens};
-use syn::{parse_macro_input, punctuated::Punctuated, Data, DataStruct, DeriveInput, Fields, FieldsNamed, Type};
+use proc_macro::TokenStream;
+use quote::quote;
+use syn::{parse_macro_input, Data, DataStruct, DeriveInput};
 
 mod packet;
 

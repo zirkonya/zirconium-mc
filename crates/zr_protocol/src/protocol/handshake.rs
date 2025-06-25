@@ -1,7 +1,7 @@
 use zr_protocol_macros::{Packet, ToBytes};
 
 use crate::{
-    parser::binary::{PrefixedLen, ToBytes},
+    parser::binary::{PrefixedLen},
     varint::VarInt,
 };
 
