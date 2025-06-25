@@ -7,3 +7,4 @@ edition = "2024"
 members = [ "crates/*"]
 
 [dependencies]
+zr_protocol = { path = "crates/zr_protocol"}

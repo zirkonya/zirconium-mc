@@ -2,6 +2,7 @@
 
 use std::ops::Deref;
 
+#[derive(Debug)]
 pub struct PrefixedLen<L, T>
 where
     L: Into<usize> + From<usize> + ToBytes,
@@ -298,9 +299,9 @@ impl ToBytes for String {
         B: Into<Vec<u8>>,
         Self: Sized,
     {
-        let string = String::from_utf8(bytes.into()).map_err(|_| ())?;
-        let size = string.len();
-        Ok((size, string))
+        let bytes: Vec<u8> = bytes.into();
+        let string = String::from_utf8(bytes).unwrap();
+        Ok((string.len(), string))
     }
 }
 

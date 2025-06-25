@@ -18,6 +18,14 @@ where
             payload,
         }
     }
+
+    pub fn into_payload(self) -> D {
+        self.payload
+    }
+
+    pub fn payload(&self) -> &D {
+        &self.payload
+    }
 }
 
 impl<D> ToBytes for Packet<D>

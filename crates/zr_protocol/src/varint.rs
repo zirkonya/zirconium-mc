@@ -276,7 +276,8 @@ impl ToBytes for VarInt<i32> {
             let current_byte: u8 = slice[cursor];
             value |= ((current_byte & SEGMENT_BITS) as u32) << position;
             if current_byte & CONTINUE_BIT == 0 {
-                break Ok((cursor, Self::new(value as i32)));
+                let value = value as i32;
+                break Ok((Self::size_of(value), Self::new(value)));
             }
             cursor += 1;
             position += 7;
