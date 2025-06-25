@@ -2,7 +2,6 @@ use std::{fmt::Debug, ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub,
 
 use crate::parser::binary::ToBytes;
 
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct VarInt<I>(I);
 
@@ -134,12 +133,6 @@ impl<I> Div<I> for VarInt<I> where I: Div<Output = I> {
         Self::new(self.0 / rhs)
     }
 }
-
-// impl<I> From<I> for VarInt<I> where I: Copy {
-//     fn from(value: I) -> Self {
-//         Self(value)
-//     }
-// }
 
 impl VarInt<i32> {
     pub const fn size(&self) -> usize {
