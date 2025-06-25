@@ -1,70 +1,17 @@
-use zr_protocol_macros::Packet;
+use zr_protocol_macros::{Packet, ToBytes};
 
 use crate::{
     parser::binary::{PrefixedLen, ToBytes},
     varint::VarInt,
 };
 
-#[derive(Packet)]
+#[derive(Packet, ToBytes)]
 #[packet(id = 0x00, state = Handshake, direction = ServerBound)]
 pub struct Handshake {
     pub protocol_version: VarInt<i32>,
     pub server_address: PrefixedLen<VarInt<i32>, String>,
     pub server_port: u16,
     pub intent: VarInt<i32>, // 1: Status, 2: Login, 3: Transfer
-}
-
-impl ToBytes for Handshake {
-    fn bytes_len(&self) -> usize {
-        self.protocol_version.bytes_len()
-            + self.server_address.bytes_len()
-            + self.server_port.bytes_len()
-            + self.intent.bytes_len()
-    }
-
-    fn to_bytes<B>(&self) -> Result<(usize, B), ()>
-    where
-        B: From<Vec<u8>>,
-    {
-        let len = self.bytes_len();
-        let mut buffer = Vec::with_capacity(len);
-        let (_, mut bytes): (_, Vec<u8>) = self.protocol_version.to_bytes()?;
-        buffer.append(&mut bytes);
-        let (_, mut bytes): (_, Vec<u8>) = self.server_address.to_bytes()?;
-        buffer.append(&mut bytes);
-        let (_, mut bytes): (_, Vec<u8>) = self.server_port.to_bytes()?;
-        buffer.append(&mut bytes);
-        let (_, mut bytes): (_, Vec<u8>) = self.intent.to_bytes()?;
-        buffer.append(&mut bytes);
-        Ok((len, B::from(buffer)))
-    }
-
-    fn from_bytes<B>(bytes: B) -> Result<(usize, Self), ()>
-    where
-        B: Into<Vec<u8>>,
-        Self: Sized,
-    {
-        let bytes = bytes.into();
-        let mut cursor = 0;
-        let (len, protocol_version) = VarInt::<i32>::from_bytes(&bytes[cursor..])?;
-        cursor += len;
-        let (len, server_address) =
-            PrefixedLen::<VarInt<i32>, String>::from_bytes(&bytes[cursor..])?;
-        cursor += len;
-        let (len, server_port) = u16::from_bytes(&bytes[cursor..])?;
-        cursor += len;
-        let (len, intent) = VarInt::<i32>::from_bytes(&bytes[cursor..])?;
-        cursor += len;
-        Ok((
-            cursor,
-            Self {
-                protocol_version,
-                server_address,
-                server_port,
-                intent,
-            },
-        ))
-    }
 }
 
 #[cfg(test)]
