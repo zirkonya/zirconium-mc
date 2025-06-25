@@ -1,4 +1,4 @@
 pub mod packet;
-pub mod varint;
 pub mod parser;
 pub mod protocol;
+pub mod varint;

@@ -1,4 +1,7 @@
-use std::{fmt::Debug, ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign}};
+use std::{
+    fmt::Debug,
+    ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
+};
 
 use crate::parser::binary::ToBytes;
 
@@ -29,62 +32,92 @@ impl<I> VarInt<I> {
     }
 }
 
-impl<I> AddAssign for VarInt<I> where I: AddAssign {
+impl<I> AddAssign for VarInt<I>
+where
+    I: AddAssign,
+{
     fn add_assign(&mut self, rhs: Self) {
         self.0 += rhs.0
     }
 }
 
-impl<I> AddAssign<I> for VarInt<I> where I: AddAssign {
+impl<I> AddAssign<I> for VarInt<I>
+where
+    I: AddAssign,
+{
     fn add_assign(&mut self, rhs: I) {
         self.0 += rhs
     }
 }
 
-impl<I> SubAssign for VarInt<I> where I: SubAssign {
+impl<I> SubAssign for VarInt<I>
+where
+    I: SubAssign,
+{
     fn sub_assign(&mut self, rhs: Self) {
         self.0 -= rhs.0
     }
 }
 
-impl<I> SubAssign<I> for VarInt<I> where I: SubAssign {
+impl<I> SubAssign<I> for VarInt<I>
+where
+    I: SubAssign,
+{
     fn sub_assign(&mut self, rhs: I) {
         self.0 -= rhs
     }
 }
 
-impl<I> MulAssign for VarInt<I> where I: MulAssign {
+impl<I> MulAssign for VarInt<I>
+where
+    I: MulAssign,
+{
     fn mul_assign(&mut self, rhs: Self) {
         self.0 *= rhs.0
     }
 }
 
-impl<I> MulAssign<I> for VarInt<I> where I: MulAssign {
+impl<I> MulAssign<I> for VarInt<I>
+where
+    I: MulAssign,
+{
     fn mul_assign(&mut self, rhs: I) {
         self.0 *= rhs
     }
 }
 
-impl<I> DivAssign for VarInt<I> where I: DivAssign {
+impl<I> DivAssign for VarInt<I>
+where
+    I: DivAssign,
+{
     fn div_assign(&mut self, rhs: Self) {
         self.0 /= rhs.0
     }
 }
 
-impl<I> DivAssign<I> for VarInt<I> where I: DivAssign {
+impl<I> DivAssign<I> for VarInt<I>
+where
+    I: DivAssign,
+{
     fn div_assign(&mut self, rhs: I) {
         self.0 /= rhs
     }
 }
 
-impl<I> Add for VarInt<I> where I: Add<Output = I> {
+impl<I> Add for VarInt<I>
+where
+    I: Add<Output = I>,
+{
     type Output = Self;
     fn add(self, rhs: Self) -> Self::Output {
         Self::new(self.0 + rhs.0)
     }
 }
 
-impl<I> Add<I> for VarInt<I> where I: Add<Output = I> {
+impl<I> Add<I> for VarInt<I>
+where
+    I: Add<Output = I>,
+{
     type Output = Self;
 
     fn add(self, rhs: I) -> Self::Output {
@@ -92,42 +125,60 @@ impl<I> Add<I> for VarInt<I> where I: Add<Output = I> {
     }
 }
 
-impl<I> Sub for VarInt<I> where I: Sub<Output = I> {
+impl<I> Sub for VarInt<I>
+where
+    I: Sub<Output = I>,
+{
     type Output = Self;
     fn sub(self, rhs: Self) -> Self::Output {
         Self::new(self.0 - rhs.0)
     }
 }
 
-impl<I> Sub<I> for VarInt<I> where I: Sub<Output = I> {
+impl<I> Sub<I> for VarInt<I>
+where
+    I: Sub<Output = I>,
+{
     type Output = Self;
     fn sub(self, rhs: I) -> Self::Output {
         Self::new(self.0 - rhs)
     }
 }
 
-impl<I> Mul for VarInt<I> where I: Mul<Output = I> {
+impl<I> Mul for VarInt<I>
+where
+    I: Mul<Output = I>,
+{
     type Output = Self;
     fn mul(self, rhs: Self) -> Self::Output {
         Self::new(self.0 * rhs.0)
     }
 }
 
-impl<I> Mul<I> for VarInt<I> where I: Mul<Output = I> {
+impl<I> Mul<I> for VarInt<I>
+where
+    I: Mul<Output = I>,
+{
     type Output = Self;
     fn mul(self, rhs: I) -> Self::Output {
         Self::new(self.0 * rhs)
     }
 }
 
-impl<I> Div for VarInt<I> where I: Div<Output = I> {
+impl<I> Div for VarInt<I>
+where
+    I: Div<Output = I>,
+{
     type Output = Self;
     fn div(self, rhs: Self) -> Self::Output {
         Self::new(self.0 / rhs.0)
     }
 }
 
-impl<I> Div<I> for VarInt<I> where I: Div<Output = I> {
+impl<I> Div<I> for VarInt<I>
+where
+    I: Div<Output = I>,
+{
     type Output = Self;
     fn div(self, rhs: I) -> Self::Output {
         Self::new(self.0 / rhs)
@@ -187,7 +238,10 @@ impl ToBytes for VarInt<i32> {
         self.size()
     }
 
-    fn to_bytes<B>(&self) -> Result<(usize, B), ()> where B: From<Vec<u8>> {
+    fn to_bytes<B>(&self) -> Result<(usize, B), ()>
+    where
+        B: From<Vec<u8>>,
+    {
         let mut slice = Vec::with_capacity(self.size());
         const SEGMENT_BITS: u32 = 0x7F;
         const CONTINUE_BIT: u32 = 0x80;
@@ -204,11 +258,15 @@ impl ToBytes for VarInt<i32> {
         Ok((self.size(), B::from(slice)))
     }
 
-    fn from_bytes<B>(bytes: B) -> Result<(usize, Self), ()> where B: Into<Vec<u8>>, Self: Sized {
+    fn from_bytes<B>(bytes: B) -> Result<(usize, Self), ()>
+    where
+        B: Into<Vec<u8>>,
+        Self: Sized,
+    {
         let slice: Vec<u8> = bytes.into();
         const SEGMENT_BITS: u8 = 0x7F;
         const CONTINUE_BIT: u8 = 0x80;
-        let mut value: u32  = 0;
+        let mut value: u32 = 0;
         let mut cursor: usize = 0;
         let mut position: usize = 0;
         loop {

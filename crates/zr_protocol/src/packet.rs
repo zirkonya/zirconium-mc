@@ -1,8 +1,11 @@
-use crate::{packet::{direction::PacketDirection, state::PacketState}, parser::binary::ToBytes};
+use crate::{
+    packet::{direction::PacketDirection, state::PacketState},
+    parser::binary::ToBytes,
+};
 
-pub mod state;
 pub mod direction;
 mod packet;
+pub mod state;
 
 pub use packet::Packet;
 
@@ -11,7 +14,10 @@ pub trait PacketData {
     const STATE: PacketState;
     const DIRECTION: PacketDirection;
 
-    fn to_packet(self) -> Packet<Self> where Self: ToBytes + Sized {
+    fn to_packet(self) -> Packet<Self>
+    where
+        Self: ToBytes + Sized,
+    {
         Packet::new(Self::ID, self)
     }
 

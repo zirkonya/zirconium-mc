@@ -2,15 +2,29 @@
 
 use std::ops::Deref;
 
-pub struct PrefixedLen<L, T> where L: Into<usize> + From<usize> + ToBytes, T: ToBytes {
+pub struct PrefixedLen<L, T>
+where
+    L: Into<usize> + From<usize> + ToBytes,
+    T: ToBytes,
+{
     size: L,
     data: T,
 }
 
-impl<L, T> PrefixedLen<L, T> where L: Into<usize> + From<usize> + ToBytes, T: ToBytes {
-    pub fn new<P>(data: P) -> Self where P: Into<T> {
+impl<L, T> PrefixedLen<L, T>
+where
+    L: Into<usize> + From<usize> + ToBytes,
+    T: ToBytes,
+{
+    pub fn new<P>(data: P) -> Self
+    where
+        P: Into<T>,
+    {
         let data: T = data.into();
-        Self { size: data.bytes_len().into(), data }
+        Self {
+            size: data.bytes_len().into(),
+            data,
+        }
     }
 
     pub fn data(&self) -> &T {
@@ -18,7 +32,11 @@ impl<L, T> PrefixedLen<L, T> where L: Into<usize> + From<usize> + ToBytes, T: To
     }
 }
 
-impl<L, T> Deref for PrefixedLen<L, T> where L: Into<usize> + From<usize> + ToBytes, T: ToBytes {
+impl<L, T> Deref for PrefixedLen<L, T>
+where
+    L: Into<usize> + From<usize> + ToBytes,
+    T: ToBytes,
+{
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
@@ -26,11 +44,15 @@ impl<L, T> Deref for PrefixedLen<L, T> where L: Into<usize> + From<usize> + ToBy
     }
 }
 
-
 pub trait ToBytes {
     fn bytes_len(&self) -> usize;
-    fn to_bytes<B>(&self) -> Result<(usize, B), ()> where B: From<Vec<u8>>;
-    fn from_bytes<B>(bytes: B) -> Result<(usize, Self), ()> where B: Into<Vec<u8>>, Self: Sized;
+    fn to_bytes<B>(&self) -> Result<(usize, B), ()>
+    where
+        B: From<Vec<u8>>;
+    fn from_bytes<B>(bytes: B) -> Result<(usize, Self), ()>
+    where
+        B: Into<Vec<u8>>,
+        Self: Sized;
 }
 
 // ***
@@ -44,11 +66,18 @@ macro_rules! number_to_bytes {
                 (<$t>::BITS / 8) as usize
             }
 
-            fn to_bytes<B>(&self) -> Result<(usize, B), ()> where B: From<Vec<u8>> {
+            fn to_bytes<B>(&self) -> Result<(usize, B), ()>
+            where
+                B: From<Vec<u8>>,
+            {
                 Ok((self.bytes_len(), B::from(self.to_be_bytes().to_vec())))
             }
 
-            fn from_bytes<B>(bytes: B) -> Result<(usize, Self), ()> where B: Into<Vec<u8>>, Self: Sized {
+            fn from_bytes<B>(bytes: B) -> Result<(usize, Self), ()>
+            where
+                B: Into<Vec<u8>>,
+                Self: Sized,
+            {
                 const LEN: usize = (<$t>::BITS / 8) as usize;
                 let bytes: Vec<u8> = bytes.into();
                 if bytes.len() < LEN {
@@ -68,11 +97,18 @@ macro_rules! number_to_bytes {
                 $s
             }
 
-            fn to_bytes<B>(&self) -> Result<(usize, B), ()> where B: From<Vec<u8>> {
+            fn to_bytes<B>(&self) -> Result<(usize, B), ()>
+            where
+                B: From<Vec<u8>>,
+            {
                 Ok(($s, B::from(self.to_be_bytes().to_vec())))
             }
 
-            fn from_bytes<B>(bytes: B) -> Result<(usize, Self), ()> where B: Into<Vec<u8>>, Self: Sized {
+            fn from_bytes<B>(bytes: B) -> Result<(usize, Self), ()>
+            where
+                B: Into<Vec<u8>>,
+                Self: Sized,
+            {
                 const LEN: usize = $s;
                 let bytes: Vec<u8> = bytes.into();
                 if bytes.len() < LEN {
@@ -93,11 +129,18 @@ impl ToBytes for bool {
         1
     }
 
-    fn to_bytes<B>(&self) -> Result<(usize, B), ()> where B: From<Vec<u8>> {
+    fn to_bytes<B>(&self) -> Result<(usize, B), ()>
+    where
+        B: From<Vec<u8>>,
+    {
         Ok((1, B::from(self.then_some(vec![0x01]).unwrap_or(vec![0x00]))))
     }
 
-    fn from_bytes<B>(bytes: B) -> Result<(usize, Self), ()> where B: Into<Vec<u8>>, Self: Sized {
+    fn from_bytes<B>(bytes: B) -> Result<(usize, Self), ()>
+    where
+        B: Into<Vec<u8>>,
+        Self: Sized,
+    {
         let bytes: Vec<u8> = bytes.into();
         if bytes.len() < 1 {
             Err(())
@@ -130,14 +173,19 @@ number_to_bytes!(f64; size: 8);
 
 #[allow(dead_code)]
 /// Warning : no prefixed size
-impl<T> ToBytes for [T] where T: ToBytes, Self: Sized {
+impl<T> ToBytes for [T]
+where
+    T: ToBytes,
+    Self: Sized,
+{
     fn bytes_len(&self) -> usize {
-        self.iter()
-            .map(|elem| elem.bytes_len())
-            .sum()
+        self.iter().map(|elem| elem.bytes_len()).sum()
     }
 
-    fn to_bytes<B>(&self) -> Result<(usize, B), ()> where B: From<Vec<u8>> {
+    fn to_bytes<B>(&self) -> Result<(usize, B), ()>
+    where
+        B: From<Vec<u8>>,
+    {
         let mut size = 0;
         let mut result = Vec::with_capacity(self.bytes_len());
         for elem in self {
@@ -148,19 +196,28 @@ impl<T> ToBytes for [T] where T: ToBytes, Self: Sized {
         Ok((size, B::from(result)))
     }
 
-    fn from_bytes<B>(_: B) -> Result<(usize, Self), ()> where B: Into<Vec<u8>>, Self: Sized {
+    fn from_bytes<B>(_: B) -> Result<(usize, Self), ()>
+    where
+        B: Into<Vec<u8>>,
+        Self: Sized,
+    {
         unreachable!()
     }
 }
 
-impl<T, const SIZE: usize> ToBytes for [T; SIZE] where T: ToBytes + Default + Copy, Self: Sized {
+impl<T, const SIZE: usize> ToBytes for [T; SIZE]
+where
+    T: ToBytes + Default + Copy,
+    Self: Sized,
+{
     fn bytes_len(&self) -> usize {
-        self.iter()
-            .map(|elem| elem.bytes_len())
-            .sum()
+        self.iter().map(|elem| elem.bytes_len()).sum()
     }
 
-    fn to_bytes<B>(&self) -> Result<(usize, B), ()> where B: From<Vec<u8>> {
+    fn to_bytes<B>(&self) -> Result<(usize, B), ()>
+    where
+        B: From<Vec<u8>>,
+    {
         let mut size = 0;
         let mut result = Vec::with_capacity(self.bytes_len());
         for elem in self {
@@ -171,7 +228,11 @@ impl<T, const SIZE: usize> ToBytes for [T; SIZE] where T: ToBytes + Default + Co
         Ok((size, B::from(result)))
     }
 
-    fn from_bytes<B>(bytes: B) -> Result<(usize, Self), ()> where B: Into<Vec<u8>>, Self: Sized {
+    fn from_bytes<B>(bytes: B) -> Result<(usize, Self), ()>
+    where
+        B: Into<Vec<u8>>,
+        Self: Sized,
+    {
         let mut buffer = Vec::new();
         let mut cursor = 0;
         let bytes: Vec<u8> = bytes.into();
@@ -179,7 +240,7 @@ impl<T, const SIZE: usize> ToBytes for [T; SIZE] where T: ToBytes + Default + Co
             let (current_size, value) = T::from_bytes(&bytes[cursor..])?;
             cursor += current_size;
             if cursor >= bytes.len() {
-                return Err(())
+                return Err(());
             }
             buffer.push(value);
         }
@@ -189,14 +250,18 @@ impl<T, const SIZE: usize> ToBytes for [T; SIZE] where T: ToBytes + Default + Co
     }
 }
 
-impl<T> ToBytes for Vec<T> where T: ToBytes {
+impl<T> ToBytes for Vec<T>
+where
+    T: ToBytes,
+{
     fn bytes_len(&self) -> usize {
-        self.iter()
-            .map(|elem| elem.bytes_len())
-            .sum()
+        self.iter().map(|elem| elem.bytes_len()).sum()
     }
 
-    fn to_bytes<B>(&self) -> Result<(usize, B), ()> where B: From<Vec<u8>> {
+    fn to_bytes<B>(&self) -> Result<(usize, B), ()>
+    where
+        B: From<Vec<u8>>,
+    {
         let mut size = 0;
         let mut result = Vec::with_capacity(self.bytes_len());
         for elem in self {
@@ -207,7 +272,11 @@ impl<T> ToBytes for Vec<T> where T: ToBytes {
         Ok((size, B::from(result)))
     }
 
-    fn from_bytes<B>(_: B) -> Result<(usize, Self), ()> where B: Into<Vec<u8>>, Self: Sized {
+    fn from_bytes<B>(_: B) -> Result<(usize, Self), ()>
+    where
+        B: Into<Vec<u8>>,
+        Self: Sized,
+    {
         panic!("from bytes not implemented for Vec<T>")
     }
 }
@@ -217,30 +286,48 @@ impl ToBytes for String {
         self.len()
     }
 
-    fn to_bytes<B>(&self) -> Result<(usize, B), ()> where B: From<Vec<u8>> {
+    fn to_bytes<B>(&self) -> Result<(usize, B), ()>
+    where
+        B: From<Vec<u8>>,
+    {
         Ok((self.bytes_len(), B::from(self.bytes().collect::<Vec<u8>>())))
     }
 
-    fn from_bytes<B>(bytes: B) -> Result<(usize, Self), ()> where B: Into<Vec<u8>>, Self: Sized {
+    fn from_bytes<B>(bytes: B) -> Result<(usize, Self), ()>
+    where
+        B: Into<Vec<u8>>,
+        Self: Sized,
+    {
         let string = String::from_utf8(bytes.into()).map_err(|_| ())?;
         let size = string.len();
         Ok((size, string))
     }
 }
 
-impl<L, T> ToBytes for PrefixedLen<L, T> where L: Into<usize> + From<usize> + ToBytes, T: ToBytes {
+impl<L, T> ToBytes for PrefixedLen<L, T>
+where
+    L: Into<usize> + From<usize> + ToBytes,
+    T: ToBytes,
+{
     fn bytes_len(&self) -> usize {
         self.data.bytes_len() + self.size.bytes_len()
     }
 
-    fn to_bytes<B>(&self) -> Result<(usize, B), ()> where B: From<Vec<u8>> {
+    fn to_bytes<B>(&self) -> Result<(usize, B), ()>
+    where
+        B: From<Vec<u8>>,
+    {
         let (prefix_size, mut prefix_bytes): (usize, Vec<u8>) = self.size.to_bytes()?;
         let (data_size, mut data_bytes): (usize, Vec<u8>) = self.data.to_bytes()?;
         prefix_bytes.append(&mut data_bytes);
         Ok((prefix_size + data_size, B::from(prefix_bytes)))
     }
 
-    fn from_bytes<B>(bytes: B) -> Result<(usize, Self), ()> where B: Into<Vec<u8>>, Self: Sized {
+    fn from_bytes<B>(bytes: B) -> Result<(usize, Self), ()>
+    where
+        B: Into<Vec<u8>>,
+        Self: Sized,
+    {
         let bytes: Vec<u8> = bytes.into();
         let (cursor, prefix_length) = L::from_bytes(&bytes[..])?;
         let len: usize = prefix_length.into();
@@ -252,7 +339,10 @@ impl<L, T> ToBytes for PrefixedLen<L, T> where L: Into<usize> + From<usize> + To
 
 #[cfg(test)]
 mod tests {
-    use crate::{parser::binary::{PrefixedLen, ToBytes}, varint::VarInt};
+    use crate::{
+        parser::binary::{PrefixedLen, ToBytes},
+        varint::VarInt,
+    };
 
     #[test]
     fn test_slice() {
