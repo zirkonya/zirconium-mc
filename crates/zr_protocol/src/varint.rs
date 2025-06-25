@@ -135,15 +135,18 @@ impl<I> Div<I> for VarInt<I> where I: Div<Output = I> {
     }
 }
 
-impl<I> From<I> for VarInt<I> where I: Copy {
-    fn from(value: I) -> Self {
-        Self(value)
-    }
-}
+// impl<I> From<I> for VarInt<I> where I: Copy {
+//     fn from(value: I) -> Self {
+//         Self(value)
+//     }
+// }
 
 impl VarInt<i32> {
     pub const fn size(&self) -> usize {
-        let value = self.0;
+        Self::size_of(self.0)
+    }
+
+    pub const fn size_of(value: i32) -> usize {
         if value < 0x80 {
             1
         } else if value < 0x4000 {
@@ -160,7 +163,10 @@ impl VarInt<i32> {
 
 impl VarInt<i64> {
     pub const fn size(&self) -> usize {
-        let value = self.0 as u64;
+        Self::size_of(self.0)
+    }
+
+    pub const fn size_of(value: i64) -> usize {
         if value < 0x80 {
             1
         } else if value < 0x4000 {
@@ -226,3 +232,45 @@ impl ToBytes for VarInt<i32> {
         }
     }
 }
+
+macro_rules! primitive_conversion {
+    ($primitive: ty => $varint: ty) => {
+        impl From<$primitive> for VarInt<$varint> {
+            fn from(value: $primitive) -> Self {
+                Self(value as $varint)
+            }
+        }
+
+        impl Into<$primitive> for VarInt<$varint> {
+            fn into(self) -> $primitive {
+                self.0 as $primitive
+            }
+        }
+    };
+}
+
+primitive_conversion!(i8 => i32);
+primitive_conversion!(u8 => i32);
+primitive_conversion!(i16 => i32);
+primitive_conversion!(u16 => i32);
+primitive_conversion!(i32 => i32);
+primitive_conversion!(u32 => i32);
+primitive_conversion!(i64 => i32);
+primitive_conversion!(u64 => i32);
+primitive_conversion!(i128 => i32);
+primitive_conversion!(u128 => i32);
+primitive_conversion!(isize => i32);
+primitive_conversion!(usize => i32);
+
+primitive_conversion!(i8 => i64);
+primitive_conversion!(u8 => i64);
+primitive_conversion!(i16 => i64);
+primitive_conversion!(u16 => i64);
+primitive_conversion!(i32 => i64);
+primitive_conversion!(u32 => i64);
+primitive_conversion!(i64 => i64);
+primitive_conversion!(u64 => i64);
+primitive_conversion!(i128 => i64);
+primitive_conversion!(u128 => i64);
+primitive_conversion!(isize => i64);
+primitive_conversion!(usize => i64);
